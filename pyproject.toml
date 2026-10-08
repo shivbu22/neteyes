@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling>=1.20.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "neteyes"
+version = "0.1.0"
+description = "Give any AI agent real eyes on the internet. Capability layer and multi-backend router for modern agents."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "NetEyes Core Team" }
+]
+keywords = [
+    "ai-agent",
+    "web-scraping",
+    "capability-layer",
+    "tool-routing",
+    "claude-code",
+    "cursor",
+    "windsurf",
+    "openclaw",
+    "browser-sessions",
+    "cookies",
+    "doctor"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "rich>=13.0.0",
+    "click>=8.1.0",
+    "httpx>=0.25.0",
+    "pydantic>=2.0.0",
+    "packaging>=23.0",
+]
+
+[project.optional-dependencies]
+web = [
+    "trafilatura>=1.6.0",
+    "beautifulsoup4>=4.12.0",
+]
+youtube = [
+    "youtube-transcript-api>=0.6.0",
+    "yt-dlp>=2024.0.0",
+]
+rss = [
+    "feedparser>=6.0.0",
+]
+search = [
+    "duckduckgo-search>=6.0.0",
+]
+reddit = [
+    "praw>=7.7.0",
+]
+all = [
+    "trafilatura>=1.6.0",
+    "beautifulsoup4>=4.12.0",
+    "youtube-transcript-api>=0.6.0",
+    "yt-dlp>=2024.0.0",
+    "feedparser>=6.0.0",
+    "duckduckgo-search>=6.0.0",
+    "praw>=7.7.0",
+]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[project.scripts]
+neteyes = "neteyes.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["neteyes"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
