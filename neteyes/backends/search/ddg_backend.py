@@ -5,8 +5,13 @@ from __future__ import annotations
 import json
 import re
 import time
+import warnings
 from typing import Any, List, Optional, Tuple
 from urllib.parse import unquote
+
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*duckduckgo_search.*")
+warnings.filterwarnings("ignore", category=RuntimeWarning, message=".*ddgs.*")
+
 from neteyes.backends.base import BaseBackend
 from neteyes.models import BackendType, ExecutionResult, HealthStatus
 from neteyes.utils.http import get_http_client

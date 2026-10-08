@@ -9,11 +9,17 @@ from pydantic import BaseModel, Field
 
 class HealthStatus(str, Enum):
     """Health status for backends and system components."""
-    HEALTHY = "healthy"
+    HEALTHY = "ok"
     DEGRADED = "degraded"
     UNAVAILABLE = "unavailable"
     REQUIRES_AUTH = "requires_auth"
     MISSING_DEPENDENCY = "missing_dependency"
+
+    @classmethod
+    def _missing_(cls, value: object):
+        if str(value).lower() in ("healthy", "ready", "available", "active"):
+            return cls.HEALTHY
+        return super()._missing_(value)
 
 
 class BackendType(str, Enum):
