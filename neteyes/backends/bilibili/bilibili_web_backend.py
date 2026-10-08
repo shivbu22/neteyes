@@ -71,28 +71,61 @@ class BilibiliWebBackend(BaseBackend):
                         error=f"Could not parse valid Bilibili BV ID from '{target}'"
                     )
 
-                resp = client.get(f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}")
-                resp.raise_for_status()
-                res_json = resp.json()
+                data = {}
+                title = "Untitled"
+                owner = "Unknown"
+                desc = ""
+                views = 0
+                danmaku = 0
+                coins = 0
+                cid = 0
 
-                if res_json.get("code") != 0:
+                # 1. Try public API first
+                try:
+                    resp = client.get(f"https://api.bilibili.com/x/web-interface/view?bvid={bvid}")
+                    if resp.status_code == 200:
+                        res_json = resp.json()
+                        if res_json.get("code") == 0:
+                            data = res_json.get("data", {})
+                            title = data.get("title", "Untitled")
+                            owner = data.get("owner", {}).get("name", "Unknown")
+                            desc = data.get("desc", "")
+                            stat = data.get("stat", {})
+                            views = stat.get("view", 0)
+                            danmaku = stat.get("danmaku", 0)
+                            coins = stat.get("coin", 0)
+                            cid = data.get("cid", 0)
+                except Exception:
+                    pass
+
+                # 2. Resilient fallback to video web page INITIAL_STATE
+                if not data:
+                    page_url = f"https://www.bilibili.com/video/{bvid}/"
+                    page_resp = client.get(page_url)
+                    state_match = re.search(r"window\.__INITIAL_STATE__\s*=\s*({.*?});", page_resp.text)
+                    if state_match:
+                        raw_state = state_match.group(1).replace("undefined", "null")
+                        state_json = json.loads(raw_state)
+                        vdata = state_json.get("videoData", {})
+                        if vdata:
+                            title = vdata.get("title", "Untitled")
+                            owner = vdata.get("owner", {}).get("name", "Unknown")
+                            desc = vdata.get("desc", "")
+                            stat = vdata.get("stat", {})
+                            views = stat.get("view", 0)
+                            danmaku = stat.get("danmaku", 0)
+                            coins = stat.get("coin", 0)
+                            cid = vdata.get("cid", 0)
+                            data = vdata
+
+                if not data:
                     return self._make_result(
                         False, "bilibili", action, start_time,
-                        error=f"Bilibili API error: {res_json.get('message', 'Unknown error')}"
+                        error=f"Could not retrieve video details for Bilibili ID '{bvid}'"
                     )
 
-                data = res_json.get("data", {})
-                title = data.get("title", "Untitled")
-                owner = data.get("owner", {}).get("name", "Unknown")
-                desc = data.get("desc", "")
-                stat = data.get("stat", {})
-                views = stat.get("view", 0)
-                danmaku = stat.get("danmaku", 0)
-                coins = stat.get("coin", 0)
-                cid = data.get("cid", 0)
-
                 markdown = (
-                    f"# Bilibili Video: {title} (`{bvid}`)\n\n"
+                    f"# Bilibili: {title} (`{bvid}`)\n\n"
                     f"**UP主:** {owner} | **Views:** {views:,} | **Danmaku:** {danmaku:,} | **Coins:** {coins:,}\n"
                     f"**Link:** https://www.bilibili.com/video/{bvid}\n\n"
                     f"## Description\n\n{desc}\n"
@@ -114,6 +147,45 @@ class BilibiliWebBackend(BaseBackend):
                     markdown=markdown,
                     raw=json.dumps(result_data, indent=2, ensure_ascii=False),
                     metadata={"bvid": bvid}
+                )
+
+            elif action == "search":
+                query = kwargs.get("query", "")
+                if not query:
+                    return self._make_result(
+                        False, "bilibili", action, start_time,
+                        error="Missing required argument 'query' for Bilibili search"
+                    )
+                limit = int(kwargs.get("limit", 5))
+
+                # Use public search endpoint
+                endpoint = f"https://api.bilibili.com/x/web-interface/search/all/v2?keyword={query}&page=1"
+                resp = client.get(endpoint)
+                items = []
+                if resp.status_code == 200:
+                    try:
+                        sdata = resp.json().get("data", {}).get("result", [])
+                        for cat in sdata:
+                            if cat.get("result_type") == "video":
+                                items = cat.get("data", [])[:limit]
+                                break
+                    except Exception:
+                        pass
+
+                md_lines = [f"# Bilibili Search: `{query}`\n"]
+                for idx, it in enumerate(items, 1):
+                    raw_t = it.get("title", "Untitled")
+                    clean_t = re.sub(r"<[^>]+>", "", raw_t)
+                    author = it.get("author", "unknown")
+                    bvid = it.get("bvid", "")
+                    link = f"https://www.bilibili.com/video/{bvid}"
+                    md_lines.append(f"{idx}. **[{clean_t}]({link})** (UP主: {author})")
+
+                return self._make_result(
+                    True, "bilibili", action, start_time,
+                    data=items,
+                    markdown="\n".join(md_lines),
+                    metadata={"query": query, "count": len(items)}
                 )
 
             elif action in ("subtitles", "subtitle", "cc"):

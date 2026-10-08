@@ -69,9 +69,10 @@ def doctor_cmd(json_output: bool) -> None:
 
     # Table of diagnostics
     table = Table(show_header=True, header_style="bold", border_style="dim")
-    table.add_column("Category", style="cyan", width=14)
-    table.add_column("Component", style="bold", width=22)
-    table.add_column("Status", width=16)
+    table.add_column("Category", style="cyan", width=12)
+    table.add_column("Component", style="bold", width=18)
+    table.add_column("Status", width=14)
+    table.add_column("Active Backend", style="green", width=20)
     table.add_column("Details", style="dim")
 
     for item in report.diagnostics:
@@ -83,7 +84,8 @@ def doctor_cmd(json_output: bool) -> None:
             HealthStatus.UNAVAILABLE: "[red]unavailable[/red]",
         }.get(item.status, item.status.value)
 
-        table.add_row(item.category, item.name, status_style, item.message)
+        active_col = item.active_backend if item.active_backend else "-"
+        table.add_row(item.category, item.name, status_style, active_col, item.message)
 
     console.print(table)
     console.print()
@@ -115,7 +117,8 @@ def route_cmd(channel: str, action: str, extra_args: tuple, json_output: bool) -
         first = extra_args[0]
         # Infer primary param based on channel
         cid = normalize_channel_id(channel)
-        if "=" not in first:
+        is_url = first.startswith(("http://", "https://"))
+        if is_url or "=" not in first:
             if cid in ("web", "rss", "podcast"):
                 kwargs["url"] = first
             elif cid == "youtube":
@@ -140,7 +143,10 @@ def route_cmd(channel: str, action: str, extra_args: tuple, json_output: bool) -
                 else:
                     kwargs["url"] = first
             elif cid == "bilibili":
-                kwargs["bvid"] = first
+                if action == "search":
+                    kwargs["query"] = " ".join(extra_args)
+                else:
+                    kwargs["bvid"] = first
             elif cid == "xhs":
                 kwargs["url"] = first
             else:
@@ -148,7 +154,7 @@ def route_cmd(channel: str, action: str, extra_args: tuple, json_output: bool) -
 
         # Parse key=value arguments
         for arg in extra_args:
-            if "=" in arg:
+            if "=" in arg and not arg.startswith(("http://", "https://")):
                 k, v = arg.split("=", 1)
                 kwargs[k.strip()] = v.strip()
 
@@ -192,7 +198,8 @@ def run_cmd(channel: str, action: str, extra_args: tuple, output_format: str, ba
     if extra_args:
         first = extra_args[0]
         cid = normalize_channel_id(channel)
-        if "=" not in first:
+        is_url = first.startswith(("http://", "https://"))
+        if is_url or "=" not in first:
             if cid in ("web", "rss", "podcast"):
                 kwargs["url"] = first
             elif cid == "youtube":
@@ -217,14 +224,17 @@ def run_cmd(channel: str, action: str, extra_args: tuple, output_format: str, ba
                 else:
                     kwargs["url"] = first
             elif cid == "bilibili":
-                kwargs["bvid"] = first
+                if action == "search":
+                    kwargs["query"] = " ".join(extra_args)
+                else:
+                    kwargs["bvid"] = first
             elif cid == "xhs":
                 kwargs["url"] = first
             else:
                 kwargs["query"] = first
 
         for arg in extra_args:
-            if "=" in arg:
+            if "=" in arg and not arg.startswith(("http://", "https://")):
                 k, v = arg.split("=", 1)
                 kwargs[k.strip()] = v.strip()
 
@@ -354,6 +364,33 @@ def config_show_cmd() -> None:
     """Display current NetEyes configuration."""
     cfg = load_config()
     console.print(json.dumps(cfg, indent=2))
+
+
+@config_group.command("set")
+@click.argument("key")
+@click.argument("value")
+def config_set_cmd(key: str, value: str) -> None:
+    """Set a configuration property (e.g. proxy, timeout_seconds)."""
+    cfg = load_config()
+    # Convert types if numeric
+    if value.lower() in ("true", "false"):
+        parsed_val: Any = value.lower() == "true"
+    elif value.isdigit():
+        parsed_val = int(value)
+    else:
+        parsed_val = value
+    cfg[key] = parsed_val
+    save_config(cfg)
+    print_success(f"Config updated: {key} = {parsed_val}")
+
+
+@config_group.command("get")
+@click.argument("key")
+def config_get_cmd(key: str) -> None:
+    """Get a configuration property value."""
+    cfg = load_config()
+    val = cfg.get(key)
+    console.print(f"{key}: {val}")
 
 
 @config_group.command("prefer")

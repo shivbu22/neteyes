@@ -68,14 +68,13 @@ def install_packages(
     in_venv = is_in_virtualenv()
 
     # Safety Guard: Installing into system python requires explicit flag
-    if not in_venv and not allow_system and env != "system":
+    if not allow_system and env in ("auto", "system") and not in_venv:
         return (
-            False,
-            f"Safety Protection: Detected system Python environment. "
-            f"To install packages ({', '.join(missing)}), please either:\n"
-            f"  1. Activate a virtual environment (recommended), or\n"
-            f"  2. Re-run with '--system' to explicitly permit system-wide installation:\n"
-            f"     neteyes install {target} --system",
+            True,
+            f"Check-only mode (env=auto, no system modifications made).\n"
+            f"Missing dependencies for '{target}': {', '.join(missing)}\n"
+            f"To install with explicit approval, run:\n"
+            f"  neteyes install {target} --env=auto --system",
             missing,
         )
 

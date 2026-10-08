@@ -178,13 +178,15 @@ def run_doctor() -> DoctorReport:
             prescriptions.append(fix_p)
         elif channel_status in (HealthStatus.DEGRADED, HealthStatus.UNAVAILABLE) and channel_notes:
             fix_p = f"Install missing backends for {ch_id}: neteyes install {ch_id}"
-            prescriptions.append(fix_p)
+        active_b = healthy_backends[0].id if healthy_backends else (backends[0].id if backends else None)
+
         diagnostics.append(
             DiagnosticItem(
                 category="channel",
                 name=ch_id,
                 status=channel_status,
                 message=f"{ch_class.name} — {summary_note}",
+                active_backend=active_b,
                 fix_prescription=fix_p,
             )
         )

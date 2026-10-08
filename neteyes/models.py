@@ -92,6 +92,7 @@ class DiagnosticItem(BaseModel):
     name: str
     status: HealthStatus
     message: str
+    active_backend: Optional[str] = Field(default=None, description="Currently active backend ID for channels")
     fix_prescription: Optional[str] = None
 
 

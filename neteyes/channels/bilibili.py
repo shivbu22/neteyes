@@ -31,6 +31,12 @@ class BilibiliChannel:
                 parameters={"bvid": "Bilibili BV ID or video URL"},
                 example_args=["BV1xx411c7mD"],
             ),
+            ActionSpec(
+                name="search",
+                description="Search Bilibili videos by keyword",
+                parameters={"query": "Search query keywords", "limit": "Max results"},
+                example_args=["AI agents 2026"],
+            ),
         ]
         return ChannelSpec(
             id=cls.id,
