@@ -1,15 +1,38 @@
-# NetEyes
-
 <div align="center">
 
-**Give any AI agent real eyes on the internet.**
+<img src="assets/netty.png" alt="Netty - NetEyes Mascot" width="220" style="border-radius: 24px; box-shadow: 0 10px 30px rgba(0, 150, 255, 0.25);" />
+
+# NetEyes 👁️✨
+### Meet **Netty** — Giving Any AI Agent Real Eyes on the Internet
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-brightgreen.svg)](https://www.python.org/)
 [![Built with Hatchling](https://img.shields.io/badge/Build-Hatchling-purple.svg)](https://hatch.pypa.io/)
 [![Zero Config](https://img.shields.io/badge/Zero--Config-Supported-success.svg)](#zero-config-channels)
+[![Mascot: Netty](https://img.shields.io/badge/Mascot-Netty%20%F0%9F%91%81%EF%B8%8F%E2%9C%A8-cyan.svg)](#-meet-netty--the-official-neteyes-mascot)
 
 </div>
+
+---
+
+## 👁️ Meet Netty — The Official NetEyes Mascot
+
+> *"Hi! I'm Netty, your internet perception buddy! Never blind an AI agent when the internet is wide open!"*
+
+**Netty** is the curious, high-bandwidth cyber-scout living inside NetEyes. Netty is a round, friendly optic explorer equipped with a cosmic deep-space iris, a multi-spectrum wireless antenna, and little cyber-sneakers for running across platforms.
+
+Whenever your AI agent needs information from the web, YouTube, Reddit, or GitHub, Netty springs into action:
+- 🔭 **Optical Zoom:** Extracts clean Markdown while filtering out ads, popups, and tracker noise.
+- 🥷 **Stealth Walk:** Seamlessly bypasses rate limits with managed proxy rotation.
+- 🔑 **Passkey Bag:** Safely carries local browser cookies to access walled content without sharing credentials.
+- ⚡ **Fast Delivery:** Feeds structured knowledge directly to Claude, Cursor, and Windsurf via MCP stdio.
+
+```bash
+# Meet Netty in your terminal anytime!
+neteyes mascot
+```
+
+---
 
 NetEyes is a **capability layer** and multi-backend router for AI agents (Claude Code, Cursor, Windsurf, OpenClaw, Codex).
 
@@ -19,6 +42,7 @@ Instead of creating another fragile, monolithic web scraper wrapper, NetEyes:
 - **Routes the agent directly to the optimal upstream CLI / tool** (`neteyes route`) so agents can execute commands natively without wrapper bloat
 - **Provides unified execution with automatic fallback chains** (`neteyes run`) when primary tools fail or are blocked
 - **Manages local browser session cookies** for walled platforms (Twitter/X, Bilibili, Xiaohongshu, LinkedIn)
+
 
 ---
 

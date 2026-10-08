@@ -84,3 +84,15 @@ def print_panel(content: Any, title: Optional[str] = None, border_style: str = "
     """Print content enclosed in a clean panel."""
     panel = Panel(content, title=title, border_style=border_style, padding=(1, 2))
     console.print(panel)
+
+
+def print_netty(greeting: Optional[str] = None) -> None:
+    """Display Netty the friendly eye mascot."""
+    msg = greeting or "Hi! I'm Netty, your internet perception buddy! 👁️✨"
+    lines = [
+        "[bold cyan]       ╭───[yellow]📶[/yellow]───╮[/bold cyan]",
+        f"[bold cyan]   👋 │  [bold white]([/bold white][bold bright_blue] ◕[/bold bright_blue][bold magenta]‿[/bold magenta][bold bright_blue]◕ [/bold bright_blue][bold white])[/bold white] │[/bold cyan]   [bold yellow]Netty:[/bold yellow] [italic white]\"{msg}\"[/italic white]",
+        "[bold cyan]      ╰──┬───┬──╯[/bold cyan]",
+        "[dim]        👟   👟[/dim]",
+    ]
+    console.print(Panel("\n".join(lines), border_style="cyan", padding=(0, 2)))

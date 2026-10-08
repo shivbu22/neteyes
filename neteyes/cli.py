@@ -32,6 +32,7 @@ from neteyes.utils.console import (
     print_error,
     print_header,
     print_info,
+    print_netty,
     print_success,
     print_warning,
 )
@@ -564,7 +565,19 @@ def dashboard_cmd(watch: bool, interval: float) -> None:
     run_dashboard(watch=watch, interval=interval)
 
 
+@cli.command("mascot")
+def mascot_cmd() -> None:
+    """Meet Netty, the lovable NetEyes eye-figured mascot!"""
+    print_netty("Hi! I'm Netty 👁️✨ — I give AI agents real eyes on the internet!")
+    console.print("\n[bold cyan]About Netty:[/bold cyan]")
+    console.print("• [bold]Figure:[/bold] Friendly optic cyber-scout with cosmic iris and wifi antenna")
+    console.print("• [bold]Mission:[/bold] Navigating web pages, subreddits, YouTube, and codebases for AI agents")
+    console.print("• [bold]Superpower:[/bold] Seeing past login walls & rotating past 429 rate limits")
+    console.print("• [bold]Motto:[/bold] [italic]\"Never blind an AI agent when the internet is wide open!\"[/italic]\n")
+
+
 @cli.command("mcp")
+
 
 def mcp_cmd() -> None:
     """Run Model Context Protocol (MCP) server over stdin/stdout for Claude Desktop, Cursor, Zed, and Windsurf."""

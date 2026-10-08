@@ -62,3 +62,12 @@ def test_cli_auth_status():
     result = runner.invoke(cli, ["auth", "status"])
     assert result.exit_code == 0
     assert "twitter" in result.output.lower()
+
+
+def test_cli_mascot():
+    """Verify neteyes mascot prints Netty greeting and details."""
+    runner = CliRunner()
+    result = runner.invoke(cli, ["mascot"])
+    assert result.exit_code == 0
+    assert "Netty" in result.output
+    assert "eyes on the internet" in result.output

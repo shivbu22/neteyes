@@ -118,15 +118,15 @@ def build_proxy_panel() -> Panel:
 
 
 def build_integrations_panel() -> Panel:
-    """Build agent & protocol readiness panel."""
+    """Build agent & protocol readiness panel with Netty the mascot."""
     lines = [
+        "[bold cyan]Netty says:[/bold cyan] [italic white]\"All capability channels are online and ready! 👁️✨\"[/italic white]",
+        "",
         "[bold green]✔ MCP Server:[/bold green] Available ([dim]neteyes mcp[/dim])",
         "[bold green]✔ Schema Generator:[/bold green] Available ([dim]neteyes schema[/dim])",
         "[bold green]✔ Safe Fallback Cascade:[/bold green] Multi-tier auto fallback",
         "[bold green]✔ Local DPAPI Cookie Sync:[/bold green] Available ([dim]neteyes auth sync[/dim])",
-        "",
-        "[dim]Direct CLI Run: neteyes run <channel> <action> <args>[/dim]",
-        "[dim]Routing Diagnostic: neteyes route <channel> <action>[/dim]",
+        "[dim]Mascot Info: neteyes mascot[/dim]",
     ]
     return Panel("\n".join(lines), title="[bold green]AI Agent Tooling Readiness[/bold green]", border_style="green", padding=(0, 1))
 
