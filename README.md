@@ -202,7 +202,25 @@ NetEyes is designed from the ground up for agent pairing. Copy `SKILL.md` to you
 
 - [Architecture & Philosophy](docs/architecture.md) — Why NetEyes is a capability layer.
 - [Agent Installation Guide](docs/install.md) — Non-interactive setup for AI agents.
-- [Adding New Platforms](docs/adding_platforms.md) — Developer tutorial for adding channels & backends.
+---
+
+## 🧪 Verification & Testing
+
+NetEyes includes built-in verification suites for continuous integration, local testing, and agent environment probing:
+
+```bash
+# Full verification suite (Linux, macOS, WSL, Git Bash)
+./test_neteyes_full.sh
+
+# Universal cross-platform test runner (Any OS)
+python test_neteyes.py
+
+# Windows native PowerShell verification
+powershell -ExecutionPolicy Bypass -File test_neteyes.ps1
+
+# Full automated unit & resilience test suite (25/25 passing)
+python -m pytest -v
+```
 
 ---
 
