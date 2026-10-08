@@ -86,3 +86,13 @@ def set_preferred_backend(channel_id: str, backend_id: str) -> None:
         cfg["preferred_backends"] = {}
     cfg["preferred_backends"][channel_id] = backend_id
     save_config(cfg)
+
+
+def reset_config() -> None:
+    """Reset configuration back to factory defaults."""
+    save_config(dict(DEFAULT_CONFIG))
+
+
+# Ergonomic aliases
+get_config = load_config
+set_backend_preference = set_preferred_backend
