@@ -28,7 +28,7 @@ Instead of creating another fragile, monolithic web scraper wrapper, NetEyes:
 
 ```bash
 # Clone and install in editable mode
-git clone https://github.com/neteyes/neteyes.git
+git clone https://github.com/shivbu22/neteyes.git
 cd neteyes
 pip install -e .
 
@@ -187,6 +187,64 @@ neteyes config prefer web trafilatura
 
 ---
 
+## 🖥️ Live Terminal Dashboard (`neteyes dashboard`)
+
+Launch a real-time terminal visual operations monitor showing channel health, active backends, cookie statuses, and proxy pools:
+
+```bash
+# Snapshot overview
+neteyes dashboard
+
+# Live auto-refreshing monitor
+neteyes dashboard --watch
+```
+
+---
+
+## 🔌 Model Context Protocol (MCP) Server
+
+Connect Claude Desktop, Cursor, Zed, or Windsurf directly to NetEyes via standard JSON-RPC stdio:
+
+```bash
+# Run server over stdio
+neteyes mcp
+```
+
+Add to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "neteyes": {
+      "command": "neteyes",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+---
+
+## 🛡️ Anti-Blocking & Proxy Pool Manager (`neteyes proxy`)
+
+Prevent IP blocks and rate limits with managed proxy rotation:
+
+```bash
+# Add proxies
+neteyes proxy add http://127.0.0.1:7890
+neteyes proxy add socks5://127.0.0.1:1080
+
+# Select rotation strategy
+neteyes proxy strategy round_robin    # or 'failover', 'random'
+
+# Probe latency and connectivity
+neteyes proxy test
+
+# View pool status
+neteyes proxy list
+```
+
+---
+
 ## 🤖 AI Agent Integration (`SKILL.md`)
 
 NetEyes is designed from the ground up for agent pairing. Copy `SKILL.md` to your agent's skills directory:
@@ -202,6 +260,7 @@ NetEyes is designed from the ground up for agent pairing. Copy `SKILL.md` to you
 
 - [Architecture & Philosophy](docs/architecture.md) — Why NetEyes is a capability layer.
 - [Agent Installation Guide](docs/install.md) — Non-interactive setup for AI agents.
+
 ---
 
 ## 🧪 Verification & Testing
@@ -209,17 +268,17 @@ NetEyes is designed from the ground up for agent pairing. Copy `SKILL.md` to you
 NetEyes includes built-in verification suites for continuous integration, local testing, and agent environment probing:
 
 ```bash
-# Full verification suite (Linux, macOS, WSL, Git Bash)
-./test_neteyes_full.sh
+# Full automated unit, integration & resilience test suite (36/36 passing)
+python -m pytest -v
 
-# Universal cross-platform test runner (Any OS)
+# Universal cross-platform functional verifier (Any OS)
 python test_neteyes.py
+
+# Full bash verification suite (Linux, macOS, WSL, Git Bash)
+./test_neteyes_full.sh
 
 # Windows native PowerShell verification
 powershell -ExecutionPolicy Bypass -File test_neteyes.ps1
-
-# Full automated unit & resilience test suite (25/25 passing)
-python -m pytest -v
 ```
 
 ---
