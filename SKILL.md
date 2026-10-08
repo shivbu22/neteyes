@@ -23,10 +23,14 @@ NetEyes is a **capability layer**, not a monolithic wrapper:
 | Intent | Command |
 |---|---|
 | Health check system & backends | `neteyes doctor` (or `neteyes doctor --json`) |
+| Interactive visual dashboard | `neteyes dashboard` (or `neteyes dashboard -w`) |
 | List all channels & backends | `neteyes list` |
 | Get direct upstream CLI command | `neteyes route <channel> <action> [args...]` |
 | Execute with automatic fallback | `neteyes run <channel> <action> [args...]` |
-| Check / manage platform cookies | `neteyes auth status` or `neteyes auth <channel> --import <file>` |
+| Sync session cookies from browser | `neteyes auth sync` (`--browser chrome/edge/brave`) |
+| Check / import platform cookies | `neteyes auth status` or `neteyes auth import <channel> <file>` |
+| Manage proxy pool & anti-blocking | `neteyes proxy add/list/strategy/test` |
+| Model Context Protocol (MCP) Server | `neteyes mcp` |
 | Safe dependency installation | `neteyes install [channel] [--check-only]` |
 
 ---
@@ -150,19 +154,74 @@ Blog posts, newsletters, and syndication feeds.
 
 ## Authentication & Browser Sessions
 
-For login-walled platforms (XHS, LinkedIn, Instagram, Boss直聘, Twitter user search):
+### Zero-Touch Auto-Sync from Local Browsers
+Sync logged-in sessions directly from Chrome, Edge, or Brave profiles with DPAPI decryption:
+```bash
+neteyes auth sync --browser all
+```
+
+### Manual Cookie Import (Cookie-Editor format)
 1. Open the target site in your browser and ensure you are logged in.
 2. Export cookies using the **Cookie-Editor** browser extension (Format: JSON) or Netscape `cookies.txt`.
 3. Save to a file (e.g. `twitter_cookies.json`).
 4. Import into NetEyes:
    ```bash
-   neteyes auth twitter --import twitter_cookies.json
+   neteyes auth import twitter twitter_cookies.json
    ```
 5. Check authentication health anytime:
    ```bash
    neteyes auth status
    ```
 *Cookies remain strictly local inside `~/.neteyes/cookies/` and are never shared or sent to third-party telemetry.*
+
+---
+
+## Model Context Protocol (MCP) Server
+
+Connect Claude Desktop, Cursor, Zed, or Windsurf to NetEyes via standard JSON-RPC stdio.
+
+Add to your `claude_desktop_config.json` or Cursor MCP settings:
+```json
+{
+  "mcpServers": {
+    "neteyes": {
+      "command": "neteyes",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+Exposes:
+- `neteyes_doctor` (System health and backend probe)
+- `neteyes_web_extract` (Boilerplate-free clean markdown web scraper)
+- `neteyes_youtube_transcript` (Timestamped transcripts and subtitles)
+- `neteyes_search_query` (Free web search)
+- `neteyes_reddit_post`, `neteyes_reddit_sub`, `neteyes_reddit_search`
+- `neteyes_github_repo`, `neteyes_github_readme`, `neteyes_github_issues`
+- `neteyes_bilibili_view`, `neteyes_bilibili_subtitles`
+- `neteyes_xhs_note`
+
+---
+
+## Proxy & Anti-Blocking Rotation Manager
+
+Configure proxy pools with automatic round-robin, random, or failover rotation:
+```bash
+# Add proxies
+neteyes proxy add http://127.0.0.1:7890
+neteyes proxy add socks5://127.0.0.1:1080
+
+# Select strategy
+neteyes proxy strategy round_robin    # or 'failover', 'random'
+
+# Test latency & reachability
+neteyes proxy test
+
+# View active pool
+neteyes proxy list
+```
+When configured, all HTTP requests through NetEyes automatically rotate through the healthy proxy pool.
+
 
 ---
 

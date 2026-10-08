@@ -353,6 +353,26 @@ def auth_delete_cmd(platform: str) -> None:
         print_warning(f"No cookies found for {platform}.")
 
 
+@auth_group.command("sync")
+@click.option("--browser", "-b", type=click.Choice(["all", "chrome", "edge", "brave"], case_sensitive=False), default="all", help="Browser to scan.")
+def auth_sync_cmd(browser: str) -> None:
+    """Sync session cookies automatically from local browser profiles."""
+    from neteyes.utils.browser_cookies import sync_browser_cookies
+    console.print(f"[bold cyan]Scanning local {browser.capitalize()} profile(s) for platform sessions...[/bold cyan]")
+    results = sync_browser_cookies(browser)
+    if not results:
+        console.print("[dim]No active session cookies found in specified browser profiles.[/dim]")
+        return
+    table = Table(show_header=True, header_style="bold", border_style="dim")
+    table.add_column("Platform", style="cyan", width=18)
+    table.add_column("Cookies Synced", width=16)
+    table.add_column("Status")
+    for plat, count in results.items():
+        table.add_row(plat.capitalize(), str(count), "[green]Active & Ready[/green]")
+    console.print(table)
+    print_success(f"Successfully synchronized sessions for {len(results)} platforms.")
+
+
 @cli.group("config")
 def config_group() -> None:
     """Manage NetEyes configuration and backend preferences."""
@@ -440,6 +460,116 @@ def self_check_cmd() -> None:
         print_warning(f"Web channel capability: {web_res.error}")
         
     print_success("NetEyes self-check completed successfully.")
+
+
+@cli.group("proxy")
+def proxy_group() -> None:
+    """Manage proxy pools, rotation strategies, and anti-blocking health probes."""
+    pass
+
+
+@proxy_group.command("list")
+def proxy_list_cmd() -> None:
+    """List all configured proxies and active rotation strategy."""
+    from neteyes.utils.proxy import list_proxies, get_proxy_strategy
+    proxies = list_proxies()
+    strat = get_proxy_strategy()
+    console.print(f"[bold cyan]Rotation Strategy:[/bold cyan] [green]{strat}[/green]\n")
+    if not proxies:
+        console.print("[dim]No proxies configured. Use 'neteyes proxy add <url>' to add one.[/dim]")
+        return
+    table = Table(show_header=True, header_style="bold", border_style="dim")
+    table.add_column("#", width=4)
+    table.add_column("Proxy URL", style="cyan")
+    table.add_column("Type", width=10)
+    for idx, p in enumerate(proxies, 1):
+        ptype = p.split("://")[0].upper() if "://" in p else "HTTP"
+        table.add_row(str(idx), p, ptype)
+    console.print(table)
+
+
+@proxy_group.command("add")
+@click.argument("proxy_url")
+def proxy_add_cmd(proxy_url: str) -> None:
+    """Add a proxy to the rotation pool (e.g. http://127.0.0.1:7890)."""
+    from neteyes.utils.proxy import add_proxy
+    try:
+        added = add_proxy(proxy_url)
+        if added:
+            print_success(f"Added proxy: {proxy_url}")
+        else:
+            print_warning(f"Proxy already exists in pool: {proxy_url}")
+    except ValueError as e:
+        print_error(str(e))
+        sys.exit(1)
+
+
+@proxy_group.command("remove")
+@click.argument("proxy_url")
+def proxy_remove_cmd(proxy_url: str) -> None:
+    """Remove a proxy from the rotation pool."""
+    from neteyes.utils.proxy import remove_proxy
+    if remove_proxy(proxy_url):
+        print_success(f"Removed proxy: {proxy_url}")
+    else:
+        print_warning(f"Proxy not found: {proxy_url}")
+
+
+@proxy_group.command("clear")
+def proxy_clear_cmd() -> None:
+    """Clear all proxies from pool."""
+    from neteyes.utils.proxy import clear_proxies
+    cnt = clear_proxies()
+    print_success(f"Cleared {cnt} proxies from pool.")
+
+
+@proxy_group.command("strategy")
+@click.argument("name", type=click.Choice(["round_robin", "random", "failover"], case_sensitive=False))
+def proxy_strategy_cmd(name: str) -> None:
+    """Set proxy rotation strategy (round_robin, random, failover)."""
+    from neteyes.utils.proxy import set_proxy_strategy
+    set_proxy_strategy(name)
+    print_success(f"Proxy strategy set to: {name}")
+
+
+@proxy_group.command("test")
+def proxy_test_cmd() -> None:
+    """Test latency and IP reachability of all configured proxies."""
+    from neteyes.utils.proxy import list_proxies, test_proxy
+    proxies = list_proxies()
+    if not proxies:
+        print_warning("No proxies configured to test.")
+        return
+    console.print(f"[bold cyan]Testing {len(proxies)} proxies...[/bold cyan]\n")
+    table = Table(show_header=True, header_style="bold", border_style="dim")
+    table.add_column("Proxy URL", style="cyan")
+    table.add_column("Status", width=12)
+    table.add_column("Latency", width=12)
+    table.add_column("Exit IP / Details")
+    for p in proxies:
+        res = test_proxy(p)
+        if res["success"]:
+            table.add_row(p, "[green]Online[/green]", f"{res['latency_ms']} ms", res.get("ip") or "OK")
+        else:
+            table.add_row(p, "[red]Failed[/red]", f"{res['latency_ms']} ms", f"[dim]{res.get('error')}[/dim]")
+    console.print(table)
+
+
+@cli.command("dashboard")
+@click.option("--watch", "-w", is_flag=True, help="Run live interactive auto-refreshing monitor.")
+@click.option("--interval", "-i", default=3.0, type=float, help="Refresh interval in seconds (default: 3.0).")
+def dashboard_cmd(watch: bool, interval: float) -> None:
+    """Open real-time interactive terminal monitoring dashboard."""
+    from neteyes.dashboard import run_dashboard
+    run_dashboard(watch=watch, interval=interval)
+
+
+@cli.command("mcp")
+
+def mcp_cmd() -> None:
+    """Run Model Context Protocol (MCP) server over stdin/stdout for Claude Desktop, Cursor, Zed, and Windsurf."""
+    from neteyes.mcp_server import run_mcp_server
+    run_mcp_server()
 
 
 def main() -> None:

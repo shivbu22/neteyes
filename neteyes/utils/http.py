@@ -50,7 +50,10 @@ def get_http_client(
     if platform:
         cookies = load_platform_cookies(platform)
 
-    proxy = cfg.get("proxy")
+    # Use rotating proxy pool if configured, else static fallback
+    from neteyes.utils.proxy import get_next_proxy
+    proxy = get_next_proxy(rotate=True) or cfg.get("proxy")
+
     return httpx.Client(
         headers=headers,
         cookies=cookies,
