@@ -128,15 +128,56 @@ try {
     $Warn++
 }
 
-# 4. Config & Safety
-Write-Host "`n=== 4. Config & Safety ===" -ForegroundColor DarkCyan
+# 4. Login / Cookie Channels (Graceful checks)
+Write-Host "`n=== 4. Login / Cookie Channels ===" -ForegroundColor DarkCyan
+
+Write-Host -NoNewline "→ Twitter / X... "
+if (Get-Command twitter -ErrorAction SilentlyContinue) {
+    Write-Host "✅ PASS (tools available)" -ForegroundColor Green
+    $Pass++
+} else {
+    Write-Host "⏭️  SKIP (Twitter tools not installed / no cookies configured)" -ForegroundColor DarkGray
+}
+
+Write-Host -NoNewline "→ Reddit... "
+if (Get-Command rdt -ErrorAction SilentlyContinue) {
+    Write-Host "✅ PASS (tools available)" -ForegroundColor Green
+    $Pass++
+} else {
+    Write-Host "⏭️  SKIP (Reddit tools not installed / no cookies configured)" -ForegroundColor DarkGray
+}
+
+Write-Host -NoNewline "→ XiaoHongShu... "
+if (Get-Command opencli -ErrorAction SilentlyContinue -or (Get-Command xhs -ErrorAction SilentlyContinue)) {
+    Write-Host "⏭️  SKIP (XiaoHongShu tools found, requires browser session)" -ForegroundColor DarkGray
+} else {
+    Write-Host "⏭️  SKIP (XiaoHongShu tools not installed)" -ForegroundColor DarkGray
+}
+
+Write-Host -NoNewline "→ Bilibili... "
+if (Get-Command bili -ErrorAction SilentlyContinue) {
+    Write-Host "✅ PASS (bili found)" -ForegroundColor Green
+    $Pass++
+} else {
+    Write-Host "⚠️  WARN (bili CLI not found, yt-dlp fallback operational)" -ForegroundColor Yellow
+}
+
+# 5. Config & Safety
+Write-Host "`n=== 5. Config & Safety ===" -ForegroundColor DarkCyan
 $cfgDir = Join-Path $HOME ".neteyes"
 if (Test-Path $cfgDir) {
     Write-Host "✅ Config directory: ~/.neteyes" -ForegroundColor Green
     $Pass++
 } else {
-    Write-Host "⚠️  No ~/.neteyes yet (created on first save)" -ForegroundColor Yellow
+    Write-Host "⚠️  No ~/.neteyes yet (normal on very first run)" -ForegroundColor Yellow
+}
+
+if ((Test-Path "./config.json") -or (Test-Path "./tools")) {
+    Write-Host "⚠️  Possible pollution detected in current directory" -ForegroundColor Yellow
     $Warn++
+} else {
+    Write-Host "✅ No workspace pollution detected" -ForegroundColor Green
+    $Pass++
 }
 
 # Summary

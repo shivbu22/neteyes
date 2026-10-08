@@ -123,10 +123,42 @@ def main() -> int:
     code, out = run(["neteyes", "run", "rss", "read", "https://news.ycombinator.com/rss"])
     warn("RSS Feed parse (Hacker News)", code == 0 and ("hacker news" in out.lower() or "http" in out), out)
 
-    # 4. Config & Safety
-    print("\n=== 4. Config & Safety ===")
+    # 4. Login-required Channels (graceful)
+    print("\n=== 4. Login / Cookie Channels ===")
+    skipped = 0
+
+    def skip(name: str, reason: str):
+        nonlocal skipped
+        print(f"→ {name}... ⏭️  SKIP ({reason})")
+        skipped += 1
+
+    if shutil.which("twitter") or shutil.which("xreach"):
+        warn("Twitter CLI tools", True)
+    else:
+        skip("Twitter / X", "tools not installed / no cookies configured")
+
+    if shutil.which("rdt"):
+        warn("Reddit CLI tools", True)
+    else:
+        skip("Reddit", "tools not installed / no cookies configured")
+
+    if shutil.which("opencli") or shutil.which("xhs"):
+        skip("XiaoHongShu", "tools found, requires browser session")
+    else:
+        skip("XiaoHongShu", "tools not installed")
+
+    if shutil.which("bili") or shutil.which("bili-cli"):
+        check("Bilibili CLI", True)
+    else:
+        warn("Bilibili CLI", True, "CLI not found, yt-dlp fallback operational via NetEyes")
+
+    # 5. Config & Safety
+    print("\n=== 5. Config & Safety ===")
     cfg_dir = Path.home() / ".neteyes"
     warn("Config directory (~/.neteyes)", cfg_dir.exists(), f"Path: {cfg_dir}")
+
+    has_pollution = Path("./config.json").exists() or Path("./tools").exists()
+    check("No workspace pollution detected", not has_pollution)
 
     # Results
     print("\n" + "=" * 48)
@@ -135,6 +167,7 @@ def main() -> int:
     print(f"✅ Passed  : {passed}")
     print(f"⚠️  Warnings: {warned}")
     print(f"❌ Failed  : {failed}")
+    print(f"⏭️  Skipped : {skipped}")
     print()
 
     if failed == 0:
