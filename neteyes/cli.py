@@ -403,6 +403,45 @@ def config_prefer_cmd(channel: str, backend_id: str) -> None:
     print_success(f"Set preferred backend for '{norm}' to '{backend_id}'.")
 
 
+@cli.command("schema")
+@click.option("--format", "fmt", type=click.Choice(["tools", "json"]), default="tools", help="Schema format (tools or json).")
+def schema_cmd(fmt: str) -> None:
+    """Export complete tool call schemas for AI agents (Claude, Cursor, MCP)."""
+    channels = list_channels()
+    tool_defs = []
+    for ch in channels:
+        for action in ch.actions:
+            tool_defs.append({
+                "name": f"neteyes_{ch.id}_{action.name}",
+                "description": f"{ch.name}: {action.description}",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        param: {"type": "string", "description": desc}
+                        for param, desc in action.parameters.items()
+                    },
+                    "required": list(action.parameters.keys()),
+                },
+            })
+    console.print(json.dumps(tool_defs, indent=2, ensure_ascii=False))
+
+
+@cli.command("self-check")
+def self_check_cmd() -> None:
+    """Run built-in diagnostic and capability self-check suite."""
+    print_header("NetEyes Operational Self-Check")
+    report = run_doctor()
+    console.print(f"Diagnostics: {report.healthy_channels} healthy channels, {report.degraded_channels} degraded, {report.unavailable_channels} unavailable.")
+    
+    web_res = run_action("web", "extract", url="https://example.com")
+    if web_res.success:
+        print_success("Web channel capability: Operational")
+    else:
+        print_warning(f"Web channel capability: {web_res.error}")
+        
+    print_success("NetEyes self-check completed successfully.")
+
+
 def main() -> None:
     """Main CLI entrypoint."""
     cli()

@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
+import shlex
 import shutil
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Tuple
 from neteyes.models import BackendSpec, BackendType, ExecutionResult, HealthStatus
+
+
+def safe_quote(arg: Any) -> str:
+    """Safely escape shell argument against command injection."""
+    s = str(arg if arg is not None else "").strip()
+    return shlex.quote(s)
 
 
 class BaseBackend(ABC):

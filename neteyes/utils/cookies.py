@@ -116,6 +116,11 @@ def save_platform_cookies(platform: str, cookies: Dict[str, str], metadata: Opti
     }
     with open(target, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
+    try:
+        import os
+        os.chmod(target, 0o600)
+    except Exception:
+        pass
     return target
 
 
